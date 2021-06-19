@@ -17,20 +17,16 @@ app.on('ready', () => {
 //Hotkey configurations for accessing QuickClips etc...
 app.whenReady().then(() => {
     globalShortcut.register('Control+X', () => {
-        window.show();
-    })
-    globalShortcut.register('Control+C', () => {
-        window.hide();
+        var a = window.isVisible()
+        if(a == false) {
+        window.show()
+        }
+        else {
+        window.hide()
+        }
     })
     globalShortcut.register('Esc', () => {
         app.quit();
-    })
-    globalShortcut.register('Control+0', () => {
-        window.open('/Users/szilard.szarvas/Desktop/ClipBoard[Tray]/teszt.html', '_blank', 'nodeIntegration=no')
-    })
-    globalShortcut.register('Command+G', () => {
-        const win = new BrowserWindow
-        win.window.open('/Users/szilard.szarvas/Desktop/electronjs/electron-quick-start/PasteContainer.html')
     })
 })
 
