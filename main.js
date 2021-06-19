@@ -1,6 +1,7 @@
-const { app, BrowserWindow, ipcMain, Tray, globalShortcut } = require('electron')
-const path = require('path')
+const { app, BrowserWindow, ipcMain, Tray, globalShortcut} = require('electron')
+const clipboard = require('electron-clipboard-extended')
 
+const path = require('path')
 const assetsDirectory = path.join(__dirname, 'assets')
 
 let tray = undefined
@@ -12,8 +13,13 @@ app.dock.hide()
 app.on('ready', () => {
     createTray()
     createWindow()
+    clipboard.startWatching()
 })
 
+clipboard.on('text-changed', () => {
+    let currentText = clipboard.readText()
+    console.log(currentText)
+})
 //Hotkey configurations for accessing QuickClips etc...
 app.whenReady().then(() => {
     globalShortcut.register('Control+X', () => {
@@ -24,6 +30,10 @@ app.whenReady().then(() => {
         else {
         window.hide()
         }
+    })
+    globalShortcut.register('Command+X', () => {
+        var a = clipboard.readText()
+        console.log(a)
     })
     globalShortcut.register('Esc', () => {
         app.quit();
