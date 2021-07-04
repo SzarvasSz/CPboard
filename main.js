@@ -1,17 +1,13 @@
-const { app, BrowserWindow, ipcMain, Tray, globalShortcut} = require('electron')
+const { app, BrowserWindow, globalShortcut} = require('electron')
 const clipboard = require('electron-clipboard-extended')
 
 const path = require('path')
-const assetsDirectory = path.join(__dirname, 'assets')
-
-let tray = undefined
-let window = undefined
+const assetsDirectory = path.join(__dirname, 'index.css')
 
 // Don't show the app in the doc
 app.dock.hide()
 
 app.on('ready', () => {
-    createTray()
     createWindow()
     clipboard.startWatching()
 })
@@ -45,56 +41,24 @@ app.on('window-all-closed', () => {
     app.quit()
 })
 
-const createTray = () => {
-    tray = new Tray(path.join(assetsDirectory, 'sunTemplate.png'))
-    tray.on('right-click', toggleWindow)
-    tray.on('double-click', toggleWindow)
-    tray.on('click', function(event) {
-        toggleWindow()
-
-        // Show devtools when command clicked
-        if (window.isVisible() && process.defaultApp && event.metaKey) {
-            window.openDevTools({ mode: 'detach' })
-        }
-    })
-}
-
-const getWindowPosition = () => {
-    const windowBounds = window.getBounds()
-    const trayBounds = tray.getBounds()
-
-    // Center window horizontally below the tray icon
-    const x = Math.round(trayBounds.x + (trayBounds.width / 2) - (windowBounds.width / 2))
-
-    // Position window 4 pixels vertically below the tray icon
-    const y = Math.round(trayBounds.y + trayBounds.height + 4)
-
-    return { x: x, y: y }
-}
-
-
 const createWindow = () => {
     window = new BrowserWindow({
-        width: 300,
-        height: 500,
-        show: false,
-        frame: false,
-        fullscreenable: false,
+        width: 1200,
+        height: 600,
+        show: true,
+        frame: true,
+        fullscreenable: true,
         resizable: true,
-        transparent: true,
         webPreferences: {
+            nodeIntegration: true,
             // Prevents renderer process code from not running when window is
             // hidden
-            backgroundThrottling: false
+            backgroundThrottling: true,
         }
     })
-    window.loadURL(`file://${path.join(__dirname, 'index.html')}`)
-
-    // Hide the window when it loses focus
-    window.on('blur', () => {
-        if (!window.webContents.isDevToolsOpened()) {
-            window.hide()
-        }
+    window.loadURL(`file://${__dirname}/views/index.html`)
+    window.webContents.on('did-finish-load', () => {
+    window.webContents.send('ping', clipboard.readText())
     })
 }
 
@@ -105,21 +69,3 @@ const toggleWindow = () => {
         showWindow()
     }
 }
-
-const showWindow = () => {
-    const position = getWindowPosition()
-    window.setPosition(position.x, position.y, false)
-    window.show()
-    window.focus()
-}
-
-
-ipcMain.on('weather-updated', (event, weather) => {
-    // Show "feels like" temperature in tray
-    tray.setTitle(`${Math.round(weather.currently.apparentTemperature)}°`)
-
-    // Show summary and last refresh time as hover tooltip
-    const time = new Date(weather.currently.time).toLocaleTimeString()
-    tray.setToolTip(`${weather.currently.summary} at ${time}`)
-
-})

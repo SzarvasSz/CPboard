@@ -2,16 +2,19 @@
 <html lang="en">
 
 <head>
+    <title> ClipboardChef </title>
     <meta charset="utf-8">
     <title>ClipboardM</title>
-    <link rel="stylesheet" href="./Vendor/photon.css" media="screen" charset="utf-8">
     <link rel="stylesheet" href="./index.css" media="screen" charset="utf-8">
-    <script charset="utf-8">
-        require('./index')
-    </script>
 </head>
 
 <body>
+    <script>
+    // renderer process
+    require('electron').ipcRenderer.on('ping', (event, message) => {
+      console.log(message) // Prints 'whoooooooh!'
+    })
+    </script>
     <div class="pasteContainer">
         <li>1.pasta</li>
         <li></li>
